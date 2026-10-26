@@ -1,26 +1,53 @@
-# Antigravity Skills
+# Antigravity Skills 跨设备技能库
 
-这是我的跨设备共享 Antigravity Skills 仓库。
+这是跨设备共享的 Antigravity 自定义技能（Skills）仓库，支持在 Windows、macOS 和 Linux 设备间快速同步与集中管理。
 
-## 目录结构
+---
 
-每个 Skill 在本目录下拥有独立的子文件夹，并包含 `SKILL.md`：
+## 仓库结构
+
+每个技能在根目录下拥有独立的子文件夹，并遵循 Antigravity 技能规范：
 
 ```text
 antigravity-skills/
-├── example-skill/
+├── example-skill/              # 示例验证技能
 │   └── SKILL.md
-└── <your-skill-name>/
-    └── SKILL.md
+├── skills-sync/                # 跨设备技能管理与同步助手
+│   ├── SKILL.md
+│   ├── scripts/                # 多端同步自动化脚本 (.ps1 / .sh)
+│   └── references/             # 详细配置与多端接入指南
+└── README.md
 ```
 
-## 在新设备上同步与启用
+---
 
-1. 克隆本仓库到新设备的用户目录：
+## 技能列表
+
+| 技能名称 | 说明 | 适用场景 |
+| :--- | :--- | :--- |
+| [`example-skill`](./example-skill/SKILL.md) | 基础验证技能 | 验证 Antigravity 是否成功加载跨设备仓库中的技能 |
+| [`skills-sync`](./skills-sync/SKILL.md) | 技能同步与多端管理 | 检查技能规范、一键拉取/推送更新、新设备初始化配置 |
+
+---
+
+## 在新设备上快速接入
+
+1. **克隆本仓库到用户目录**：
    ```bash
-   git clone <本仓库URL> ~/antigravity-skills
+   git clone https://github.com/Ciel-huzhixin/antigravity-skills.git ~/antigravity-skills
    ```
-2. 在新设备的全局配置 `~/.gemini/config/skills.json` 中配置：
+
+2. **配置全局技能清单 (`~/.gemini/config/skills.json`)**：
+   可以直接运行一键初始化脚本：
+   - **Windows (PowerShell)**：
+     ```powershell
+     & "$HOME\antigravity-skills\skills-sync\scripts\sync-skills.ps1" -Action init
+     ```
+   - **macOS / Linux**：
+     ```bash
+     bash ~/antigravity-skills/skills-sync/scripts/sync-skills.sh init
+     ```
+   或者手动编辑 `~/.gemini/config/skills.json`：
    ```json
    {
      "entries": [
@@ -28,3 +55,6 @@ antigravity-skills/
      ]
    }
    ```
+
+3. **更多详细指引**：
+   请参考 [多设备配置指南](./skills-sync/references/multi-device-setup.md)。
