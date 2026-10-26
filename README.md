@@ -16,6 +16,9 @@ antigravity-skills/
 │   ├── SKILL.md
 │   ├── scripts/                # 多端同步自动化脚本 (.ps1 / .sh)
 │   └── references/             # 详细配置与多端接入指南
+├── lean-frontend-coding/       # 精益前端开发规范（拒绝过度防御）
+│   ├── SKILL.md
+│   └── examples/               # 常见 Bad vs Good 案例对比
 └── README.md
 ```
 
@@ -27,6 +30,7 @@ antigravity-skills/
 | :--- | :--- | :--- |
 | [`example-skill`](./example-skill/SKILL.md) | 基础验证技能 | 验证 Antigravity 是否成功加载跨设备仓库中的技能 |
 | [`skills-sync`](./skills-sync/SKILL.md) | 技能同步与多端管理 | 检查技能规范、一键拉取/推送更新、新设备初始化配置 |
+| [`lean-frontend-coding`](./lean-frontend-coding/SKILL.md) | 精益前端代码规范 | 拒绝前端过度防御与多重字段猜测兜底（`||` 滥用），倡导契约优先与主动确认 |
 
 ---
 
