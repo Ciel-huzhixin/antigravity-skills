@@ -11,7 +11,7 @@ ACTION="${1:-status}"
 MESSAGE="${2:-chore: sync skills at $(date '+%Y-%m-%d %H:%M:%S')}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 CONFIG_DIR="$HOME/.gemini/config"
 CONFIG_FILE="$CONFIG_DIR/skills.json"
 

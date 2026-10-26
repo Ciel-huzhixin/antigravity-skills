@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     跨设备 Antigravity Skills 同步与管理脚本 (Windows PowerShell)
 .DESCRIPTION
@@ -16,7 +16,7 @@ param (
     [string]$Message = ""
 )
 
-$RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
+$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $ConfigDir = Join-Path $HOME ".gemini\config"
 $ConfigFile = Join-Path $ConfigDir "skills.json"
 
@@ -41,74 +41,69 @@ function Test-SkillValid([string]$SkillDir) {
 
 Push-Location $RepoRoot
 try {
-    switch ($Action) {
-        "status" {
-            Write-Host "=== 检查本地技能规范 ===" -ForegroundColor Cyan
-            $subdirs = Get-ChildItem -Directory | Where-Object { $_.Name -notmatch '^\.' }
-            $hasError = $false
-            foreach ($dir in $subdirs) {
-                $check = Test-SkillValid -SkillDir $dir.FullName
-                if ($check.Valid) {
-                    Write-Host "  [OK] $($dir.Name)" -ForegroundColor Green
-                } else {
-                    Write-Host "  [WARN] $($dir.Name) - $($check.Reason)" -ForegroundColor Yellow
-                    $hasError = $true
-                }
-            }
-
-            Write-Host "`n=== 检查 ~/.gemini/config/skills.json 链接状态 ===" -ForegroundColor Cyan
-            if (Test-Path $ConfigFile) {
-                Write-Host "  [OK] skills.json 已存在: $ConfigFile" -ForegroundColor Green
-                $json = Get-Content -Raw -Path $ConfigFile -Encoding UTF8
-                if ($json -match 'antigravity-skills') {
-                    Write-Host "  [OK] 已包含 antigravity-skills 路径引用" -ForegroundColor Green
-                } else {
-                    Write-Host "  [WARN] 尚未引用 antigravity-skills，可执行 -Action init 添加" -ForegroundColor Yellow
-                }
+    if ($Action -eq "status") {
+        Write-Host "=== 检查本地技能规范 ===" -ForegroundColor Cyan
+        $subdirs = Get-ChildItem -Directory | Where-Object { $_.Name -notmatch '^\.' }
+        $hasError = $false
+        foreach ($dir in $subdirs) {
+            $check = Test-SkillValid -SkillDir $dir.FullName
+            if ($check.Valid) {
+                Write-Host "  [OK] $($dir.Name)" -ForegroundColor Green
             } else {
-                Write-Host "  [WARN] 未检测到 skills.json，可执行 -Action init 初始化" -ForegroundColor Yellow
+                Write-Host "  [WARN] $($dir.Name) - $($check.Reason)" -ForegroundColor Yellow
+                $hasError = $true
             }
-
-            Write-Host "`n=== Git 状态 ===" -ForegroundColor Cyan
-            git status -s
         }
 
-        "pull" {
-            Write-Host "=== 从远程拉取最新技能 ===" -ForegroundColor Cyan
-            git pull origin main
+        Write-Host "`n=== 检查 ~/.gemini/config/skills.json 链接状态 ===" -ForegroundColor Cyan
+        if (Test-Path $ConfigFile) {
+            Write-Host "  [OK] skills.json 已存在: $ConfigFile" -ForegroundColor Green
+            $json = Get-Content -Raw -Path $ConfigFile -Encoding UTF8
+            if ($json -match 'antigravity-skills') {
+                Write-Host "  [OK] 已包含 antigravity-skills 路径引用" -ForegroundColor Green
+            } else {
+                Write-Host "  [WARN] 尚未引用 antigravity-skills，可执行 -Action init 添加" -ForegroundColor Yellow
+            }
+        } else {
+            Write-Host "  [WARN] 未检测到 skills.json，可执行 -Action init 初始化" -ForegroundColor Yellow
         }
 
-        "push" {
-            if ([string]::IsNullOrWhiteSpace($Message)) {
-                $Message = "chore: sync skills at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
-            }
-            Write-Host "=== 提交并推送技能 ===" -ForegroundColor Cyan
-            git add -A
-            $status = git status --porcelain
-            if (-not $status) {
-                Write-Host "没有需要提交的更改。" -ForegroundColor Yellow
-                return
-            }
-            git commit -m "$Message"
-            git push origin main
-            Write-Host "推送完成！" -ForegroundColor Green
+        Write-Host "`n=== Git 状态 ===" -ForegroundColor Cyan
+        git status -s
+    }
+    elseif ($Action -eq "pull") {
+        Write-Host "=== 从远程拉取最新技能 ===" -ForegroundColor Cyan
+        git pull origin main
+    }
+    elseif ($Action -eq "push") {
+        if ([string]::IsNullOrWhiteSpace($Message)) {
+            $Message = "chore: sync skills at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
         }
-
-        "init" {
-            Write-Host "=== 初始化本地 skills.json 配置 ===" -ForegroundColor Cyan
-            if (-not (Test-Path $ConfigDir)) {
-                New-Item -ItemType Directory -Path $ConfigDir -Force | Out-Null
-            }
-            $configData = @{
-                entries = @(
-                    @{ path = "~/antigravity-skills" }
-                )
-            }
-            $jsonContent = $configData | ConvertTo-Json -Depth 5
-            Set-Content -Path $ConfigFile -Value $jsonContent -Encoding UTF8
-            Write-Host "已更新配置文件: $ConfigFile" -ForegroundColor Green
-            Write-Host $jsonContent
+        Write-Host "=== 提交并推送技能 ===" -ForegroundColor Cyan
+        git add -A
+        $status = git status --porcelain
+        if (-not $status) {
+            Write-Host "没有需要提交的更改。" -ForegroundColor Yellow
+            return
         }
+        git commit -m "$Message"
+        git push origin main
+        Write-Host "推送完成！" -ForegroundColor Green
+    }
+    elseif ($Action -eq "init") {
+        Write-Host "=== 初始化本地 skills.json 配置 ===" -ForegroundColor Cyan
+        if (-not (Test-Path $ConfigDir)) {
+            New-Item -ItemType Directory -Path $ConfigDir -Force | Out-Null
+        }
+        $configData = @{
+            entries = @(
+                @{ path = "~/antigravity-skills" }
+            )
+        }
+        $jsonContent = $configData | ConvertTo-Json -Depth 5
+        Set-Content -Path $ConfigFile -Value $jsonContent -Encoding UTF8
+        Write-Host "已更新配置文件: $ConfigFile" -ForegroundColor Green
+        Write-Host $jsonContent
     }
 }
 finally {
